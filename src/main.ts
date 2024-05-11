@@ -4,8 +4,6 @@ import { env } from './env';
 import ready from './listeners/ready';
 import interactionCreate from './listeners/interactionCreate';
 import { DeploymentType, deployCommands } from './deploy-commands';
-import { generateDependencyReport } from '@discordjs/voice';
-console.log(generateDependencyReport());
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
