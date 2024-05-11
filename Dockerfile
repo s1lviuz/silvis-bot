@@ -1,5 +1,10 @@
 FROM node:alpine as builder
 
+RUN apk add --no-cache python3 py3-pip python3-dev py3-pillow
+RUN apk add --no-cache build-base cmake git
+RUN apk add --no-cache libsodium libtool autoconf automake
+RUN apk add --no-cache ffmpeg
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
