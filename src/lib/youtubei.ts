@@ -2,7 +2,6 @@
 import { Innertube, Utils, UniversalCache } from 'youtubei.js';
 import { VideoInfo } from 'youtubei.js/dist/src/parser/youtube';
 import fs from 'fs';
-import crypto from 'crypto';
 
 export let youtubei: Innertube | null = null;
 
@@ -42,34 +41,58 @@ export const getVideoIdFromUrl = async (innertube: Innertube, url: string) => {
     return search.payload.videoId as string;
 }
 
-export const downloadVideo = async (video: VideoInfo) => {
-    console.log(video.basic_info.title);
+export const getPlaylistIdFromUrl = async (innertube: Innertube, url: string) => {
+    const search = await innertube.resolveURL(url);
 
-    const stream = await video.download({
-        type: 'audio',
-        quality: 'bestefficiency',
-        format: 'mp4'
-    });
+    if (search.payload.url) {
+        const resolved = await innertube.resolveURL(search.payload.url);
+        if (resolved.payload.url) {
+            throw new Error('Failed to resolve URL: ' + search.payload.url);
+        }
 
-    console.info('Downloading...');
+        if (!resolved.payload.playlistId) {
+            throw new Error('Failed to get playlist ID from URL: ' + search.payload.url);
+        }
 
-    const uuid = crypto.randomUUID();
-
-    const dir = `./downloads/${uuid}.mp4`;
-
-    if (!fs.existsSync('./downloads')) {
-        fs.mkdirSync('./downloads');
+        return resolved.payload.playlistId as string;
     }
 
-    const file = fs.createWriteStream(`${dir}`);
-
-    for await (const chunk of Utils.streamToIterable(stream)) {
-        file.write(chunk);
+    if (!search.payload.playlistId) {
+        throw new Error('Failed to get playlist ID from URL: ' + url);
     }
 
-    file.end();
+    return search.payload.playlistId as string;
+}
 
-    console.info('Downloaded to ' + dir);
+export const downloadVideo = async (video: VideoInfo, uuid: string) => {
+    try {
+        const stream = await video.download({
+            type: 'audio',
+            quality: 'bestefficiency',
+            format: 'mp4'
+        });
 
-    return dir;
+        console.info('Downloading...');
+
+        const dir = `./downloads/${uuid}.mp4`;
+
+        if (!fs.existsSync('./downloads')) {
+            fs.mkdirSync('./downloads');
+        }
+
+        const file = fs.createWriteStream(`${dir}`);
+
+        for await (const chunk of Utils.streamToIterable(stream)) {
+            file.write(chunk);
+        }
+
+        file.end();
+
+        console.info('Downloaded');
+
+        return dir;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to download video');
+    }
 }

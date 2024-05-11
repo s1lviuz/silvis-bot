@@ -57,17 +57,7 @@ export const getPlayer = () => {
             },
         });
 
-        player.on(AudioPlayerStatus.Idle, () => {
-            console.log("Player is idle");
-            setTimeout(() => {
-                if (player?.state.status === AudioPlayerStatus.Idle) {
-                    player.stop();
-                    player = null;
-                }
-            }, 5 * 60 * 1000);
-        });
-
-        player.on(AudioPlayerStatus.Playing, () => {
+        player.on(AudioPlayerStatus.Playing, (o, s) => {
             console.log("Player is playing");
         });
 
