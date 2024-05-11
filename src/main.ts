@@ -7,7 +7,7 @@ import { DeploymentType, deployCommands } from './deploy-commands';
 import { startYoutubeAPI } from '@/lib/youtubei';
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
 console.log("Bot is starting...");
 
 // When the client is ready, run this code (only once).

@@ -3,6 +3,8 @@ import { Command } from "@/Command";
 import { getConnection, getPlayer } from "@/audio-player";
 import { downloadVideo, getVideoIdFromUrl } from "@/lib/youtubei";
 import { youtubei } from "@/lib/youtubei";
+import { AudioPlayerStatus, createAudioResource } from "@discordjs/voice";
+import { join } from "path";
 
 enum Option {
     URL = "url",
@@ -37,15 +39,35 @@ const Play: Command = {
         }
 
         try {
+            const connection = getConnection(interaction);
+
+            if (!connection) {
+                return interaction.followUp("Not connected to a voice channel");
+            }
+
+            const player = getPlayer();
+
+            if (!player) {
+                return interaction.followUp("Failed to get the player");
+            }
+
+            if (player.state.status === AudioPlayerStatus.Playing) {
+                return interaction.followUp("Already playing a video");
+            }
+
             const videoId = await getVideoIdFromUrl(youtubei, url);
 
             const video = await youtubei.getInfo(videoId);
 
-            await downloadVideo(video);
+            const dir = await downloadVideo(video);
 
-            // const connection = getConnection(interaction);
+            const resource = createAudioResource(join('/usr/src/app', dir));
 
-            // const player = getPlayer();
+            player.play(resource);
+
+            connection.subscribe(player);
+
+            return interaction.followUp("Playing the video");
         } catch (error) {
             console.error(error);
             return interaction.followUp("Failed to play the video");

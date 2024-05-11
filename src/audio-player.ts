@@ -8,8 +8,15 @@ export const getConnection = (interaction: CommandInteraction) => {
         if (connectionExists) {
             return connectionExists;
         } else {
+            const voiceChannelId = guild.members.cache.get(interaction.user.id)?.voice.channelId;
+            console.log(voiceChannelId);
+
+            if (!voiceChannelId) {
+                return null;
+            }
+
             const newConnection = joinVoiceChannel({
-                channelId: interaction.channelId,
+                channelId: voiceChannelId,
                 guildId: guild.id,
                 adapterCreator: guild.voiceAdapterCreator,
             });
@@ -52,6 +59,12 @@ export const getPlayer = () => {
 
         player.on(AudioPlayerStatus.Idle, () => {
             console.log("Player is idle");
+            setTimeout(() => {
+                if (player?.state.status === AudioPlayerStatus.Idle) {
+                    player.stop();
+                    player = null;
+                }
+            }, 5 * 60 * 1000);
         });
 
         player.on(AudioPlayerStatus.Playing, () => {

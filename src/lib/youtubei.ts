@@ -70,4 +70,6 @@ export const downloadVideo = async (video: VideoInfo) => {
     file.end();
 
     console.info('Downloaded to ' + dir);
+
+    return dir;
 }
