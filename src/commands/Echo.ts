@@ -28,8 +28,8 @@ const Echo: Command = {
         const content = interaction.options.get(Option.Input)?.value || "You didn't provide any input!";
         const isEphemeral = interaction.options.get(Option.Ephemeral)?.value as boolean || false;
 
+        await interaction.deferReply({ ephemeral: isEphemeral });
         await interaction.followUp({
-            ephemeral: isEphemeral,
             content: content.toString()
         });
     }
