@@ -7,7 +7,11 @@ export default (client: Client): void => {
             return;
         }
 
-        await client.application.commands.set(commands);
+        try {
+            await client.application.commands.set(commands);
+        } catch (error) {
+            console.error(error);
+        }
 
         console.log(`${client.user.username} is online`);
     });
