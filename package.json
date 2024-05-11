@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build && node --env-file .env dist/main.js",
-    "build": "tsc -p .",
+    "build": "tsc -p . && tsc-alias",
     "dev": "nodemon src/main.ts"
   },
   "author": "",
@@ -16,9 +16,12 @@
     "discord.js": "^14.15.2",
     "libsodium-wrappers": "^0.7.13",
     "sodium": "^3.0.2",
+    "youtubei.js": "^9.4.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/node": "^20.12.11",
+    "tsc-alias": "^1.8.9",
     "typescript": "^5.4.5"
   }
 }

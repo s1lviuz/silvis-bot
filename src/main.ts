@@ -1,9 +1,10 @@
-// Require the necessary discord.js classes
-import { Client, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
+import { Innertube, UniversalCache } from 'youtubei.js';
 import { env } from './env';
 import ready from './listeners/ready';
 import interactionCreate from './listeners/interactionCreate';
 import { DeploymentType, deployCommands } from './deploy-commands';
+import { startYoutubeAPI } from '@/lib/youtubei';
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -24,3 +25,6 @@ try {
 
 // Log in to Discord with your client's token
 client.login(env.DISCORD_TOKEN);
+
+// Create a new instance of the YouTube API
+startYoutubeAPI();
