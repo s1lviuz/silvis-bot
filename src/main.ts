@@ -17,7 +17,7 @@ interactionCreate(client);
 
 // Deploy commands to Discord
 try {
-    deployCommands(DeploymentType.GUILD);
+    deployCommands(DeploymentType.GLOBAL);
 } catch (error) {
     console.error(error);
 }

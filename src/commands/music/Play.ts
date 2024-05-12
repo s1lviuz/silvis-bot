@@ -1,7 +1,7 @@
 import { CommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
 import { Command } from "@/Command";
 import { getConnection, getPlayer } from "@/audio-player";
-import { downloadVideo, getPlaylistIdFromUrl, getVideoIdFromUrl, getVideosFromPlaylist } from "@/lib/youtubei";
+import { downloadVideo, getVideoIdFromUrl, getVideosFromPlaylist } from "@/lib/youtubei";
 import { youtubei } from "@/lib/youtubei";
 import { AudioPlayer, AudioPlayerStatus, createAudioResource } from "@discordjs/voice";
 import { join } from "path";
@@ -33,7 +33,7 @@ const videoReproducedPromisse = (player: AudioPlayer) => new Promise<boolean>((r
 
 const getAudioResource = (dir: string) => {
     const resource = createAudioResource(join('/usr/src/app', dir), { inlineVolume: true });
-    resource.volume?.setVolume(0.5);
+    resource.volume?.setVolume(0.25);
 
     return resource;
 }
