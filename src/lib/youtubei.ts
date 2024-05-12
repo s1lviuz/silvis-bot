@@ -13,6 +13,9 @@ export const startYoutubeAPI = async () => {
         console.log("YouTube API is ready!");
 
         youtubei = innerTube;
+
+        // Clear downloads folder
+        clearDownloads();
     } catch (error) {
         console.error(error);
     }
@@ -64,6 +67,14 @@ export const getPlaylistIdFromUrl = async (innertube: Innertube, url: string) =>
     return search.payload.playlistId as string;
 }
 
+export const getVideosFromPlaylist = async (youtubei: Innertube, url: string) => {
+    const playlistId = await getPlaylistIdFromUrl(youtubei, url);
+    
+    const playlist = await youtubei.getPlaylist(playlistId);
+
+    return playlist.items.map((video) => ({ ...video, uuid: crypto.randomUUID() }));
+}
+
 export const downloadVideo = async (video: VideoInfo, uuid: string) => {
     try {
         const stream = await video.download({
@@ -94,5 +105,17 @@ export const downloadVideo = async (video: VideoInfo, uuid: string) => {
     } catch (error) {
         console.error(error);
         throw new Error('Failed to download video');
+    }
+}
+
+export const clearDownloads = () => {
+    if (fs.existsSync('./downloads')) {
+        const files = fs.readdirSync('./downloads');
+
+        for (const file of files) {
+            fs.unlinkSync(`./downloads/${file}`);
+        }
+
+        console.info('Downloads folder cleared');
     }
 }

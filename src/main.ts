@@ -1,5 +1,4 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import { Innertube, UniversalCache } from 'youtubei.js';
 import { env } from './env';
 import ready from './listeners/ready';
 import interactionCreate from './listeners/interactionCreate';

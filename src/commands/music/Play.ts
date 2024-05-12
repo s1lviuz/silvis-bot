@@ -1,7 +1,7 @@
 import { CommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
 import { Command } from "@/Command";
 import { getConnection, getPlayer } from "@/audio-player";
-import { downloadVideo, getPlaylistIdFromUrl, getVideoIdFromUrl } from "@/lib/youtubei";
+import { downloadVideo, getPlaylistIdFromUrl, getVideoIdFromUrl, getVideosFromPlaylist } from "@/lib/youtubei";
 import { youtubei } from "@/lib/youtubei";
 import { AudioPlayer, AudioPlayerStatus, createAudioResource } from "@discordjs/voice";
 import { join } from "path";
@@ -21,11 +21,7 @@ enum Option {
 
 const videoReproducedPromisse = (player: AudioPlayer) => new Promise<boolean>((resolve, reject) => {
     player.on(AudioPlayerStatus.Idle, () => {
-        if (stoppedByCommand) {
-            stoppedByCommand = false;
-            resolve(false);
-        }
-
+        console.log("Video finished");
         resolve(true);
     });
 
@@ -34,6 +30,13 @@ const videoReproducedPromisse = (player: AudioPlayer) => new Promise<boolean>((r
         resolve(false);
     });
 });
+
+const getAudioResource = (dir: string) => {
+    const resource = createAudioResource(join('/usr/src/app', dir), { inlineVolume: true });
+    resource.volume?.setVolume(0.5);
+
+    return resource;
+}
 
 
 const Play: Command = {
@@ -97,19 +100,19 @@ const Play: Command = {
             }
 
             if (isPlaylist) {
-                const playlistId = await getPlaylistIdFromUrl(youtubei, url);
-
-                const playlist = await youtubei.getPlaylist(playlistId);
-
-                const videos = playlist.items.map((video) => ({ ...video, uuid: crypto.randomUUID() }));
+                const videos = await getVideosFromPlaylist(youtubei, url);
 
                 for await (const video of videos) {
+                    if (stoppedByCommand) {
+                        console.log("Stopped by command");
+                        return;
+                    }
                     try {
                         const videoInfo = await youtubei.getInfo(video.id);
 
                         const dir = await downloadVideo(videoInfo, video.uuid);
 
-                        const resource = createAudioResource(join('/usr/src/app', dir));
+                        const resource = getAudioResource(dir);
 
                         connection.subscribe(player);
 
@@ -145,7 +148,7 @@ const Play: Command = {
 
                 const dir = await downloadVideo(video, uuid);
 
-                const resource = createAudioResource(join('/usr/src/app', dir));
+                const resource = getAudioResource(dir);
 
                 connection.subscribe(player);
 
