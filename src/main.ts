@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, REST } from 'discord.js';
 import { env } from './env';
 import ready from './listeners/ready';
 import interactionCreate from './listeners/interactionCreate';
@@ -14,6 +14,9 @@ ready(client);
 
 // When the client detects an interaction, run this code
 interactionCreate(client);
+
+// Create a new REST instance
+export const discordRestApi = new REST().setToken(env.DISCORD_TOKEN);
 
 // Deploy commands to Discord
 try {

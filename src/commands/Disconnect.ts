@@ -2,7 +2,7 @@ import { CommandInteraction, Client, ApplicationCommandType } from "discord.js";
 import { Command } from "@/Command";
 import { getVoiceConnection } from "@discordjs/voice";
 
-const Hello: Command = {
+const Disconnect: Command = {
     name: "disconnect",
     description: "Disconnects the bot from the voice channel",
     type: ApplicationCommandType.ChatInput,
@@ -24,4 +24,4 @@ const Hello: Command = {
     }
 };
 
-export default Hello;
+export default Disconnect;

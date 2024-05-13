@@ -1,4 +1,4 @@
-import { CommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
+import { CommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command } from "@/Command";
 import { getConnection, getPlayer } from "@/audio-player";
 import { downloadVideo, getVideoIdFromUrl, getVideosFromPlaylist } from "@/lib/youtubei";
@@ -108,6 +108,8 @@ const Play: Command = {
 
                 interaction.followUp(`Reproducing ${videos.length} items from the playlist`);
 
+                const verifyTextChannelAcess = interaction.guild?.members.me?.permissionsIn(interaction.channelId).has(PermissionFlagsBits.SendMessages);
+
                 for await (const video of videos) {
                     if (stoppedByCommand) {
                         console.log("Stopped by command");
@@ -124,7 +126,8 @@ const Play: Command = {
 
                         player.play(resource);
 
-                        interaction.channel?.send(`Playing ${videoInfo.basic_info.title}`);
+                        if (verifyTextChannelAcess)
+                            interaction.channel?.send(`Playing ${videoInfo.basic_info.title}`);
 
                         const reproduced = await videoReproducedPromisse(player);
 
@@ -135,13 +138,15 @@ const Play: Command = {
                         }
 
                         if (videos.length === 0) {
-                            return interaction.channel?.send("Playlist finished");
+                            if (verifyTextChannelAcess)
+                                return interaction.channel?.send("Playlist finished");
                         }
 
                         console.log("Next video");
                     } catch (error) {
                         console.error(error);
-                        interaction.channel?.send("Failed to play the video");
+                        if (verifyTextChannelAcess)
+                            interaction.channel?.send("Failed to play the video");
                         break;
                     }
                 }
