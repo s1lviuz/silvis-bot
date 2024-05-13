@@ -1,6 +1,7 @@
 import { CommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType } from "discord.js";
 import { Command } from "@/Command";
 import { getPlayer } from "@/audio-player";
+import { AudioPlayerStatus } from "@discordjs/voice";
 
 enum Option {
 
@@ -8,7 +9,7 @@ enum Option {
 
 const Pause: Command = {
     name: "pause",
-    description: "Pauses the current video",
+    description: "Pauses the player if it's reproducing something",
     type: ApplicationCommandType.ChatInput,
     cooldown: 5,
     run: async (client: Client, interaction: CommandInteraction) => {
@@ -17,7 +18,7 @@ const Pause: Command = {
         try {
             const player = getPlayer();
 
-            if (!player) {
+            if (!(player.state.status === AudioPlayerStatus.Playing)) {
                 return interaction.followUp("I'm not reproducing anything right now");
             }
 

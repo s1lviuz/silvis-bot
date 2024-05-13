@@ -71,7 +71,7 @@ const Play: Command = {
         }
 
         if (player.state.status === AudioPlayerStatus.Playing) {
-            return interaction.followUp("Already playing a video");
+            return interaction.followUp("Already playing something");
         }
 
         if (stoppedByCommand) {
@@ -106,6 +106,8 @@ const Play: Command = {
 
                 const videos = isSpotifyPlaylist ? await getYoutubeLinksFromSpotifyPlaylistUrl(url) : await getVideosFromPlaylist(youtubei, url);
 
+                interaction.followUp(`Reproducing ${videos.length} items from the playlist`);
+
                 for await (const video of videos) {
                     if (stoppedByCommand) {
                         console.log("Stopped by command");
@@ -122,7 +124,7 @@ const Play: Command = {
 
                         player.play(resource);
 
-                        interaction.followUp(`Playing ${videoInfo.basic_info.title}`);
+                        interaction.channel?.send(`Playing ${videoInfo.basic_info.title}`);
 
                         const reproduced = await videoReproducedPromisse(player);
 
@@ -133,13 +135,13 @@ const Play: Command = {
                         }
 
                         if (videos.length === 0) {
-                            return interaction.followUp("Playlist finished");
+                            return interaction.channel?.send("Playlist finished");
                         }
 
                         console.log("Next video");
                     } catch (error) {
                         console.error(error);
-                        interaction.followUp("Failed to reproduce the list");
+                        interaction.channel?.send("Failed to play the video");
                         break;
                     }
                 }
@@ -168,7 +170,7 @@ const Play: Command = {
             }
         } catch (error) {
             console.error(error);
-            return interaction.followUp("Failed to play th link");
+            return interaction.followUp("Failed to play the link");
         }
     }
 };

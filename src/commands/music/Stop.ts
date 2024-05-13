@@ -9,7 +9,7 @@ enum Option {
 
 const Stop: Command = {
     name: "stop",
-    description: "Stops the current video",
+    description: "Stops the player",
     type: ApplicationCommandType.ChatInput,
     cooldown: 5,
     run: async (client: Client, interaction: CommandInteraction) => {
@@ -18,18 +18,14 @@ const Stop: Command = {
         try {
             const player = getPlayer();
 
-            if (!player) {
-                return interaction.followUp("I'm not reproducing anything right now");
-            }
-
             setStoppedByCommand(true);
             
             player.stop();
 
-            return interaction.followUp("Video stopped");
+            return interaction.followUp("Player stopped");
         } catch (error) {
             console.error(error);
-            return interaction.followUp("Failed to stop the video");
+            return interaction.followUp("Failed to stop the player");
         }
     }
 };
