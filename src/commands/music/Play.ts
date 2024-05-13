@@ -39,10 +39,9 @@ const getAudioResource = (dir: string) => {
     return resource;
 }
 
-
 const Play: Command = {
     name: "play",
-    description: "Reproduces a youtube link (only audio)",
+    description: "Reproduces a audio from a youtube or spotify link",
     type: ApplicationCommandType.ChatInput,
     cooldown: 5,
     options: [
@@ -53,7 +52,7 @@ const Play: Command = {
         },
         {
             name: Option.PLAYLIST,
-            description: "If the video is part of a playlist",
+            description: "If the link is a playlist",
             type: ApplicationCommandOptionType.Boolean,
         }
     ],
@@ -68,7 +67,7 @@ const Play: Command = {
 
         if (player.state.status === AudioPlayerStatus.Paused) {
             player.unpause();
-            return interaction.followUp("Video unpaused");
+            return interaction.followUp("Player unpaused");
         }
 
         if (player.state.status === AudioPlayerStatus.Playing) {
@@ -140,7 +139,7 @@ const Play: Command = {
                         console.log("Next video");
                     } catch (error) {
                         console.error(error);
-                        interaction.followUp("Failed to reproduce the video");
+                        interaction.followUp("Failed to reproduce the list");
                         break;
                     }
                 }
@@ -169,7 +168,7 @@ const Play: Command = {
             }
         } catch (error) {
             console.error(error);
-            return interaction.followUp("Failed to play the video");
+            return interaction.followUp("Failed to play th link");
         }
     }
 };
