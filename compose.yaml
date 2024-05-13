@@ -1,6 +1,6 @@
 services:
-  nodejs:
-    container_name: nodejs
+  silvis-bot:
+    container_name: silvis-bot
     image: nodejs
     build:
       context: .

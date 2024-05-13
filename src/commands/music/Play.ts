@@ -47,7 +47,7 @@ const Play: Command = {
     options: [
         {
             name: Option.URL,
-            description: "The youtube link to reproduce",
+            description: "The link to reproduce",
             type: ApplicationCommandOptionType.String,
         },
         {
