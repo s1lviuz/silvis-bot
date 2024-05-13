@@ -33,7 +33,13 @@ export const getYoutubeLinksFromSpotifyPlaylistUrl = async (url: string) => new 
     });
 
     python.stderr.on('data', (data) => {
-        reject(data.toString());
+        console.error(data.toString());
+    });
+
+    python.on('close', (code) => {
+        if (code !== 0) {
+            reject('Failed to get playlist');
+        }
     });
 });
 
@@ -51,6 +57,12 @@ export const getYoutubeLinkFromSpotifyUrl = async (url: string) => new Promise<s
     });
 
     python.stderr.on('data', (data) => {
-        reject(data.toString());
+        console.error(data.toString());
+    });
+
+    python.on('close', (code) => {
+        if (code !== 0) {
+            reject('Failed to get song');
+        }
     });
 });

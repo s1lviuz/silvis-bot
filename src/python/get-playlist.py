@@ -7,9 +7,7 @@ from spotdl import Spotdl
 
 load_dotenv()
 
-playlistUrl = ''
-for line in sys.stdin:
-    playlistUrl += line
+playlistUrl = sys.argv[1]
 
 # playlistUrl = input()
     

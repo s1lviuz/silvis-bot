@@ -6,6 +6,7 @@ RUN apk add --no-cache libsodium libtool autoconf automake
 RUN apk add --no-cache ffmpeg
 
 RUN pip install spotdl --break-system-packages
+RUN pip install python-dotenv --break-system-packages
 
 WORKDIR /usr/src/app
 

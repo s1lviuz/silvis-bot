@@ -2,12 +2,7 @@ import { REST, Routes } from "discord.js";
 import commands from "./commands";
 import { env } from "./env";
 
-export enum DeploymentType {
-    GUILD = 'guild',
-    GLOBAL = 'global',
-}
-
-export const deployCommands = async (type: DeploymentType = DeploymentType.GLOBAL): Promise<void> => {
+export const deployCommands = async (type: 'guild' | 'global'): Promise<void> => {
     const rest = new REST().setToken(env.DISCORD_TOKEN);
 
     try {
@@ -15,7 +10,7 @@ export const deployCommands = async (type: DeploymentType = DeploymentType.GLOBA
 
         let data: any[]
 
-		if (type === DeploymentType.GUILD) {
+		if (type === 'guild') {
             console.log(`Deploying commands to guild ${env.DISCORD_GUILD_ID}`);
             data = await rest.put(
                 Routes.applicationGuildCommands(env.DISCORD_CLIENT_ID, env.DISCORD_GUILD_ID),

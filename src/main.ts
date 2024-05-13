@@ -2,7 +2,7 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { env } from './env';
 import ready from './listeners/ready';
 import interactionCreate from './listeners/interactionCreate';
-import { DeploymentType, deployCommands } from './deploy-commands';
+import { deployCommands } from './deploy-commands';
 import { startYoutubeAPI } from '@/lib/youtubei';
 
 // Create a new client instance
@@ -17,7 +17,7 @@ interactionCreate(client);
 
 // Deploy commands to Discord
 try {
-    deployCommands(DeploymentType.GLOBAL);
+    deployCommands(env.DEPLOYMENT_TYPE);
 } catch (error) {
     console.error(error);
 }

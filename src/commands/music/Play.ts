@@ -86,7 +86,9 @@ const Play: Command = {
         const url = interaction.options.get(Option.URL)?.value as string;
         const isPlaylist = interaction.options.get(Option.PLAYLIST)?.value as boolean || false;
 
-        const urlRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/;
+        const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/;
+        const spRegex = /(?:https?:\/\/)?(?:www\.)?(?:open\.spotify\.com)\/(.+)/;
+        const urlRegex = new RegExp(`(${ytRegex.source})|(${spRegex.source})`);
         const isUrl = urlRegex.test(url);
 
         if (!isUrl) {
