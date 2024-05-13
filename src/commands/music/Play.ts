@@ -7,6 +7,7 @@ import { AudioPlayer, AudioPlayerStatus, createAudioResource } from "@discordjs/
 import { join } from "path";
 import crypto from "crypto";
 import fs from "fs";
+import { getYoutubeLinkFromSpotifyUrl, getYoutubeLinksFromSpotifyPlaylistUrl } from "@/python/controller";
 
 export let stoppedByCommand = false;
 
@@ -100,7 +101,9 @@ const Play: Command = {
             }
 
             if (isPlaylist) {
-                const videos = await getVideosFromPlaylist(youtubei, url);
+                const isSpotifyPlaylist = url.includes("spotify");
+
+                const videos = isSpotifyPlaylist ? await getYoutubeLinksFromSpotifyPlaylistUrl(url) : await getVideosFromPlaylist(youtubei, url);
 
                 for await (const video of videos) {
                     if (stoppedByCommand) {
@@ -108,9 +111,9 @@ const Play: Command = {
                         return;
                     }
                     try {
-                        const videoInfo = await youtubei.getInfo(video.id);
+                        const videoInfo = await youtubei.getInfo(typeof video === "string" ? await getVideoIdFromUrl(youtubei, video) : video.id);
 
-                        const dir = await downloadVideo(videoInfo, video.uuid);
+                        const dir = await downloadVideo(videoInfo, crypto.randomUUID());
 
                         const resource = getAudioResource(dir);
 
@@ -118,7 +121,7 @@ const Play: Command = {
 
                         player.play(resource);
 
-                        interaction.followUp(`Playing ${video.title.text}`);
+                        interaction.followUp(`Playing ${videoInfo.basic_info.title}`);
 
                         const reproduced = await videoReproducedPromisse(player);
 
@@ -140,7 +143,9 @@ const Play: Command = {
                     }
                 }
             } else {
-                const videoId = await getVideoIdFromUrl(youtubei, url);
+                const isSpotify = url.includes("spotify");
+
+                const videoId = await getVideoIdFromUrl(youtubei, isSpotify ? await getYoutubeLinkFromSpotifyUrl(url) : url);
 
                 const video = await youtubei.getInfo(videoId);
 

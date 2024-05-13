@@ -5,6 +5,8 @@ RUN apk add --no-cache build-base cmake git
 RUN apk add --no-cache libsodium libtool autoconf automake
 RUN apk add --no-cache ffmpeg
 
+RUN pip install spotdl --break-system-packages
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./

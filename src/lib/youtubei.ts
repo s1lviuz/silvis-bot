@@ -72,7 +72,7 @@ export const getVideosFromPlaylist = async (youtubei: Innertube, url: string) =>
     
     const playlist = await youtubei.getPlaylist(playlistId);
 
-    return playlist.items.map((video) => ({ ...video, uuid: crypto.randomUUID() }));
+    return playlist.items;
 }
 
 export const downloadVideo = async (video: VideoInfo, uuid: string) => {
