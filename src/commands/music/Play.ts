@@ -42,6 +42,8 @@ const getAudioResource = (dir: string) => {
 }
 
 const createPlayingEmbed = (video: VideoInfo) => {
+    const bestThumbnail = video.basic_info.thumbnail?.sort((a, b) => b.width - a.width)[0].url ?? '';
+
     return {
         title: video.basic_info.title,
         author: {
@@ -49,7 +51,7 @@ const createPlayingEmbed = (video: VideoInfo) => {
         },
         description: video.basic_info.short_description,
         thumbnail: {
-            url: video.basic_info.thumbnail ? video.basic_info.thumbnail[0].url : '',
+            url: bestThumbnail,
         },
         fields: [
             {
@@ -68,7 +70,7 @@ const createPlayingEmbed = (video: VideoInfo) => {
                 inline: true,
             },
         ],
-        timestamp: format(new Date(), "dd/MM/yyyy HH:mm:ss"),
+        timestamp: new Date().toISOString(),
         footer: {
             text: "Playing",
         }
@@ -207,7 +209,7 @@ const Play: Command = {
                     fs.unlinkSync(join('/usr/src/app', dir));
                 });
 
-                return interaction.followUp(`Playing ${video.basic_info.title}`);
+                return interaction.followUp({ embeds: [createPlayingEmbed(video)] });
             }
         } catch (error) {
             console.error(error);
