@@ -1,4 +1,4 @@
-import { CommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { CommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType, PermissionFlagsBits, APIEmbed } from "discord.js";
 import { Command } from "@/Command";
 import { getConnection, getPlayer } from "@/audio-player";
 import { downloadVideo, getVideoIdFromUrl, getVideosFromPlaylist } from "@/lib/youtubei";
@@ -8,6 +8,8 @@ import { join } from "path";
 import crypto from "crypto";
 import fs from "fs";
 import { getYoutubeLinkFromSpotifyUrl, getYoutubeLinksFromSpotifyPlaylistUrl } from "@/python/controller";
+import { VideoInfo } from "youtubei.js/dist/src/parser/youtube";
+import { format } from "date-fns";
 
 export let stoppedByCommand = false;
 
@@ -37,6 +39,40 @@ const getAudioResource = (dir: string) => {
     resource.volume?.setVolume(0.25);
 
     return resource;
+}
+
+const createPlayingEmbed = (video: VideoInfo) => {
+    return {
+        title: video.basic_info.title,
+        author: {
+            name: video.basic_info.author ?? "Unknown",
+        },
+        description: video.basic_info.short_description,
+        thumbnail: {
+            url: video.basic_info.thumbnail ? video.basic_info.thumbnail[0].url : '',
+        },
+        fields: [
+            {
+                name: "Channel",
+                value: `[${video.basic_info.channel?.name}](${video.basic_info.channel?.url})`,
+                inline: true,
+            },
+            {
+                name: "Views",
+                value: video.basic_info.view_count?.toLocaleString() ?? "Unknown",
+                inline: true,
+            },
+            {
+                name: "Duration",
+                value: video.basic_info.duration ? new Date(video.basic_info.duration * 1000).toISOString().substr(11, 8) : "Unknown",
+                inline: true,
+            },
+        ],
+        timestamp: format(new Date(), "dd/MM/yyyy HH:mm:ss"),
+        footer: {
+            text: "Playing",
+        }
+    } satisfies APIEmbed;
 }
 
 const Play: Command = {
@@ -127,7 +163,7 @@ const Play: Command = {
                         player.play(resource);
 
                         if (verifyTextChannelAcess)
-                            interaction.channel?.send(`Playing ${videoInfo.basic_info.title}`);
+                            interaction.channel?.send({ embeds: [createPlayingEmbed(videoInfo)] });
 
                         const reproduced = await videoReproducedPromisse(player);
 
