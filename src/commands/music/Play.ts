@@ -36,7 +36,7 @@ const videoReproducedPromisse = (player: AudioPlayer) => new Promise<boolean>((r
 
 const getAudioResource = (dir: string) => {
     const resource = createAudioResource(join('/usr/src/app', dir), { inlineVolume: true });
-    resource.volume?.setVolume(0.25);
+    resource.volume?.setVolume(0.1);
 
     return resource;
 }
@@ -77,21 +77,23 @@ const createPlayingEmbed = (video: VideoInfo) => {
     } satisfies APIEmbed;
 }
 
+const verifyPlaylist = (url: string) => {
+    const spotify = url.toLowerCase().includes("playlist");
+    const youtube = url.toLowerCase().includes("list");
+
+    return spotify || youtube;
+}
+
 const Play: Command = {
     name: "play",
-    description: "Reproduces a audio from a youtube or spotify link",
+    description: "Reproduz uma música ou playlist no seu canal de voz",
     type: ApplicationCommandType.ChatInput,
     cooldown: 5,
     options: [
         {
             name: Option.URL,
-            description: "The link to reproduce",
+            description: "URL da música ou playlist",
             type: ApplicationCommandOptionType.String,
-        },
-        {
-            name: Option.PLAYLIST,
-            description: "If the link is a playlist",
-            type: ApplicationCommandOptionType.Boolean,
         }
     ],
     run: async (client: Client, interaction: CommandInteraction) => {
@@ -100,16 +102,36 @@ const Play: Command = {
         const player = getPlayer();
 
         if (!player) {
-            return interaction.followUp("Failed to get the player");
+            return interaction.followUp({
+                embeds: [{
+                    title: "⚠️ Player musical não encontrado",
+                    description: "Tente conectar ao canal de voz novamente",
+                }]
+            });
         }
 
         if (player.state.status === AudioPlayerStatus.Paused) {
             player.unpause();
-            return interaction.followUp("Player unpaused");
+            return interaction.followUp({
+                embeds: [{
+                    title: "▶️ Player musical despausado",
+                }]
+            });
         }
 
         if (player.state.status === AudioPlayerStatus.Playing) {
-            return interaction.followUp("Already playing something");
+            return interaction.followUp({
+                embeds: [{
+                    title: "⏸️ Player musical já está reproduzindo",
+                    description: "Pause o player musical antes de reproduzir outra música",
+                    fields: [
+                        {
+                            name: "Comando de pausa",
+                            value: "/pause",
+                        },
+                    ]
+                }]
+            });
         }
 
         if (stoppedByCommand) {
@@ -117,11 +139,15 @@ const Play: Command = {
         }
 
         if (!youtubei) {
-            return interaction.followUp("YouTube API is not ready");
+            return interaction.followUp({
+                embeds: [{
+                    title: "⚠️ Erro ao carregar a API do Youtube",
+                    description: "Tente novamente mais tarde",
+                }]
+            });
         }
 
         const url = interaction.options.get(Option.URL)?.value as string;
-        const isPlaylist = interaction.options.get(Option.PLAYLIST)?.value as boolean || false;
 
         const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/;
         const spRegex = /(?:https?:\/\/)?(?:www\.)?(?:open\.spotify\.com)\/(.+)/;
@@ -129,14 +155,36 @@ const Play: Command = {
         const isUrl = urlRegex.test(url);
 
         if (!isUrl) {
-            return interaction.followUp("Invalid URL");
+            return interaction.followUp({
+                embeds: [{
+                    title: "⚠️ URL inválida",
+                    description: "A URL informada não é válida",
+                    fields: [
+                        {
+                            name: "Formato esperado",
+                            value: "https://www.youtube.com/watch?v=VIDEO_ID",
+                        },
+                        {
+                            name: "Formato esperado",
+                            value: "https://open.spotify.com/playlist/PLAYLIST_ID",
+                        },
+                    ]
+                }]
+            });
         }
+
+        const isPlaylist = verifyPlaylist(url);
 
         try {
             const connection = getConnection(interaction);
 
             if (!connection) {
-                return interaction.followUp("Not connected to a voice channel");
+                return interaction.followUp({
+                    embeds: [{
+                        title: "⚠️ Conexão não encontrada",
+                        description: "Conecte ao canal de voz para reproduzir músicas",
+                    }]
+                });
             }
 
             if (isPlaylist) {
@@ -144,7 +192,18 @@ const Play: Command = {
 
                 const videos = isSpotifyPlaylist ? await getYoutubeLinksFromSpotifyPlaylistUrl(url) : await getVideosFromPlaylist(youtubei, url);
 
-                interaction.followUp(`Reproducing ${videos.length} items from the playlist`);
+                interaction.followUp({
+                    embeds: [{
+                        title: "🎵 Playlist adicionada",
+                        description: `Playlist com ${videos.length} músicas adicionada`,
+                        fields: [
+                            {
+                                name: "Data",
+                                value: format(new Date(), "dd/MM/yyyy HH:mm:ss"),
+                            },
+                        ]
+                    }]
+                });
 
                 const verifyTextChannelAcess = interaction.guild?.members.me?.permissionsIn(interaction.channelId).has(PermissionFlagsBits.SendMessages);
 
@@ -177,14 +236,24 @@ const Play: Command = {
 
                         if (videos.length === 0) {
                             if (verifyTextChannelAcess)
-                                return interaction.channel?.send("Playlist finished");
+                                return interaction.channel?.send({
+                                    embeds: [{
+                                        title: "🎵 Playlist finalizada",
+                                        description: "Todas as músicas da playlist foram reproduzidas",
+                                    }]
+                                });
                         }
 
                         console.log("Next video");
                     } catch (error) {
                         console.error(error);
                         if (verifyTextChannelAcess)
-                            interaction.channel?.send("Failed to play the video");
+                            interaction.channel?.send({
+                                embeds: [{
+                                    title: "⚠️ Erro ao reproduzir a música",
+                                    description: "Ocorreu um erro ao reproduzir a música",
+                                }]
+                            });
                         break;
                     }
                 }
@@ -213,7 +282,12 @@ const Play: Command = {
             }
         } catch (error) {
             console.error(error);
-            return interaction.followUp("Failed to play the link");
+            return interaction.followUp({
+                embeds: [{
+                    title: "⚠️ Erro ao reproduzir a música",
+                    description: "Ocorreu um erro ao reproduzir a música",
+                }]
+            });
         }
     }
 };
