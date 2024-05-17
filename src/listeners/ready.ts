@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { ActivityType, Client } from "discord.js";
 import commands from "../commands";
 
 export default (client: Client): void => {
@@ -6,6 +6,11 @@ export default (client: Client): void => {
         if (!client.user || !client.application) {
             return;
         }
+
+        client.user.setActivity({
+            name: "🎧 /play {url} para tocar música!",
+            type: ActivityType.Custom
+        });
 
         try {
             await client.application.commands.set(commands);
